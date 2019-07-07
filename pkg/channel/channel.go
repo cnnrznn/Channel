@@ -10,5 +10,9 @@ type Channel struct {
 }
 
 func (c Channel) String() string {
-    return fmt.Sprintf("%v, [%v]", c.Id, c.Peers)
+    return fmt.Sprintf("{%v, %v}", c.Id, c.Peers)
+}
+
+func (c Channel) PingAll() int {
+    return -1
 }

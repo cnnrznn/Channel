@@ -1,17 +1,43 @@
 package main
 
 import (
-  "channel"
+  "encoding/json"
   "flag"
+  "fmt"
+  "github.com/cnnrznn/channel/pkg/channel"
+  "io/ioutil"
 )
 
+type Config struct {
+    Peers []string `json:"peers"`
+}
+
+func checkError(err error) {
+    if nil != err {
+        fmt.Println(err)
+    }
+}
+
 func main() {
+    var err error
+
     id := *flag.Int("id", -1, "Index of this process in the config")
-    conf := *flag.String("conf", "config.json", "Config file for the network")
+    confFn := *flag.String("conf", "config.json", "Config file for the network")
     flag.Parse()
 
     // Load the JSON config here
+    config := Config{}
+
+    confData, err := ioutil.ReadFile(confFn)
+    checkError(err)
+
+    err = json.Unmarshal([]byte(confData), &config)
+    checkError(err)
 
     // Instantiate the channel
-    ch := channel.Channel{Id: id}
+    ch := channel.Channel{Id: id,
+                          Peers: config.Peers}
+
+    fmt.Println(ch)
+    ch.PingAll()
 }
