@@ -21,23 +21,28 @@ func checkError(err error) {
 func main() {
     var err error
 
-    id := *flag.Int("id", -1, "Index of this process in the config")
-    confFn := *flag.String("conf", "config.json", "Config file for the network")
+    id := flag.Int("id", -1, "Index of this process in the config")
+    confFn := flag.String("conf", "config.json", "Config file for the network")
     flag.Parse()
 
     // Load the JSON config here
     config := Config{}
 
-    confData, err := ioutil.ReadFile(confFn)
+    confData, err := ioutil.ReadFile(*confFn)
     checkError(err)
 
     err = json.Unmarshal([]byte(confData), &config)
     checkError(err)
 
     // Instantiate the channel
-    ch := channel.Channel{Id: id,
+    ch := channel.Channel{Id: *id,
                           Peers: config.Peers}
-
     fmt.Println(ch)
+
+    pingChan := make(chan string)
+    go ch.Serve(pingChan)
+
     ch.PingAll()
+
+    fmt.Println(<-pingChan)
 }
