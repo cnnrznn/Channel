@@ -14,29 +14,23 @@ func (c Channel) String() string {
     return fmt.Sprintf("{%v, %v}", c.Id, c.Peers)
 }
 
-func (c Channel) PingAll() int {
-    ch := make(chan int)
-
+func (c Channel) PingAll() {
     for index, _ := range c.Peers {
-        go c.Send("ping", index, ch)
+        go c.Send("ping", index)
     }
-
-    for range c.Peers {
-        <-ch
-    }
-
-    return 0
 }
 
-func (c Channel) Send(msg string, index int, ch chan int) {
-    fmt.Println("Sending", msg, "to", c.Peers[index])
-
+func (c Channel) Send(msg string, index int) {
     conn, _ := net.Dial("udp", c.Peers[index])
     defer conn.Close()
 
     conn.Write([]byte(msg))
+}
 
-    ch <- 0
+func (c Channel) Broadcast(msg string) {
+    for index, _ := range c.Peers {
+        go c.Send(msg, index)
+    }
 }
 
 func (c Channel) Serve(ch chan string) {
