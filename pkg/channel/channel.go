@@ -33,17 +33,18 @@ func (c Channel) Broadcast(msg string) {
     }
 }
 
-func (c Channel) Serve(ch chan string) {
+func (c Channel) Serve(dataChan chan string, addrChan chan string) {
     pc, _ := net.ListenPacket("udp", c.Peers[c.Id])
     defer pc.Close()
 
-    buffer := make([]byte, 1024)
+    buffer := make([]byte, 2048)
 
     for {
-        n, _, err := pc.ReadFrom(buffer)
+        n, addr, err := pc.ReadFrom(buffer)
         if err != nil {
             continue
         }
-        ch <- string(buffer[:n])
+        dataChan <- string(buffer[:n])
+        addrChan <- addr.String()
     }
 }
