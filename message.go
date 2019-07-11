@@ -6,14 +6,21 @@ import (
     "log"
 )
 
+type MsgType int
+
+const (
+    INITIAL MsgType = iota
+    ECHO
+)
+
 type Message struct {
     From int
-    Type int
+    Type MsgType
     Round int
     Data string
 }
 
-func MsgFromBytes(rawBytes []byte) Message {
+func MessageFromBytes(rawBytes []byte) Message {
     var buffer bytes.Buffer
     dec := gob.NewDecoder(&buffer)
     var msg Message
