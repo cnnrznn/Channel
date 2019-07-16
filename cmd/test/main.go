@@ -4,7 +4,7 @@ import (
   "encoding/json"
   "flag"
   "fmt"
-  "github.com/cnnrznn/channel/pkg/channel"
+  "github.com/cnnrznn/channel"
   "io/ioutil"
 )
 
@@ -39,10 +39,11 @@ func main() {
                           Peers: config.Peers}
     fmt.Println(ch)
 
-    pingChan := make(chan string)
-    go ch.Serve(pingChan)
+    msgChan := make(chan channel.Msg)
+    addrChan := make(chan string)
+    go ch.Serve(msgChan, addrChan)
 
     ch.PingAll()
 
-    fmt.Println(<-pingChan)
+    fmt.Println(<-msgChan, <-addrChan)
 }
