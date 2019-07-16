@@ -13,17 +13,17 @@ const (
     ECHO
 )
 
-type Message struct {
+type Msg struct {
     From int
     Type MsgType
     Round int
     Data string
 }
 
-func MessageFromBytes(rawBytes []byte) Message {
+func MsgFromBytes(rawBytes []byte) Msg {
     var buffer bytes.Buffer
     dec := gob.NewDecoder(&buffer)
-    var msg Message
+    var msg Msg
 
     buffer.Write(rawBytes)
     err := dec.Decode(&msg)
@@ -34,7 +34,7 @@ func MessageFromBytes(rawBytes []byte) Message {
     return msg
 }
 
-func (m Message) ToBytes() []byte {
+func (m Msg) MsgToBytes() []byte {
     var buffer bytes.Buffer
     enc := gob.NewEncoder(&buffer)
 

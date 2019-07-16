@@ -20,20 +20,20 @@ func (c Channel) String() string {
 //    }
 //}
 
-func (c Channel) Send(msg Message, index int) {
+func (c Channel) Send(msg Msg, index int) {
     conn, _ := net.Dial("udp", c.Peers[index])
     defer conn.Close()
 
     conn.Write(msg.ToBytes())
 }
 
-func (c Channel) Broadcast(msg Message) {
+func (c Channel) Broadcast(msg Msg) {
     for index, _ := range c.Peers {
         go c.Send(msg, index)
     }
 }
 
-func (c Channel) Serve(dataChan chan Message, addrChan chan string) {
+func (c Channel) Serve(dataChan chan Msg, addrChan chan string) {
     pc, _ := net.ListenPacket("udp", c.Peers[c.Id])
     defer pc.Close()
 
@@ -45,9 +45,9 @@ func (c Channel) Serve(dataChan chan Message, addrChan chan string) {
             continue
         }
 
-        // TODO try to convert the bytes into a Message
+        // TODO try to convert the bytes into a Msg
         // if I can, ack the sender and return the message
-        msg := MessageFromBytes(buffer[:n])
+        msg := MsgFromBytes(buffer[:n])
 
         dataChan <- msg
         addrChan <- addr.String()
