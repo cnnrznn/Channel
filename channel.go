@@ -2,6 +2,7 @@ package channel
 
 import (
     "fmt"
+    "log"
     "net"
     "time"
 )
@@ -20,28 +21,34 @@ func (c Channel) PingAll() {
                INITIAL,
                45,
                "ping"}
-    for index, _ := range c.Peers {
-        go c.Send(msg, index)
-    }
+    c.Broadcast(msg)
 }
 
 func (c Channel) Send(msg Msg, index int) {
-    conn, _ := net.Dial("udp", c.Peers[index])
+    conn, err := net.Dial("udp", c.Peers[index])
+    if err != nil {
+        log.Fatal("Could not dial:", err)
+    }
     defer conn.Close()
 
     data := msg.MsgToBytes()
     buff := make([]byte, 128)
 
     for {
-        conn.Write(data)
+        fmt.Println("Sending", msg, "to", c.Peers[index])
+        n, err := conn.Write(data)
+        if err != nil {
+            log.Fatal(err)
+        }
 
-        time.Sleep(2 * time.Second)
+        conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+        n, err = conn.Read(buff)
 
-        n, err := conn.Read(buff)
         if err != nil {
             continue
         }
         if string(buff[:n]) == "ok" {
+            fmt.Println("Received ack from", c.Peers[index])
             return
         }
     }
@@ -64,12 +71,17 @@ func (c Channel) Serve(dataChan chan Msg, addrChan chan string) {
         if err != nil {
             continue
         }
+        fmt.Println("Received", n, "bytes from", addr)
 
         // TODO try to convert the bytes into a Msg
         // if I can, ack the sender and return the message
         msg := MsgFromBytes(buffer[:n])
 
-        pc.WriteTo([]byte("ok"), addr)
+        n, err = pc.WriteTo([]byte("ok"), addr)
+        if err != nil {
+            log.Fatal("Failed to send 'ok' ack")
+        }
+        fmt.Println("Sent ack to", addr, ":", msg)
 
         dataChan <- msg
         addrChan <- addr.String()

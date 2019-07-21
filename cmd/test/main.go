@@ -6,6 +6,7 @@ import (
   "fmt"
   "github.com/cnnrznn/channel"
   "io/ioutil"
+  "time"
 )
 
 type Config struct {
@@ -43,7 +44,16 @@ func main() {
     addrChan := make(chan string)
     go ch.Serve(msgChan, addrChan)
 
-    ch.PingAll()
+    for i:=0; i<10; i++ {
+        ch.PingAll()
+    }
 
-    fmt.Println(<-msgChan, <-addrChan)
+    for i:=0; i<10*len(ch.Peers); i++ {
+        fmt.Println(<-msgChan, <-addrChan)
+    }
+
+    for {
+        fmt.Println("Done receiving")
+        time.Sleep(5 * time.Second)
+    }
 }
