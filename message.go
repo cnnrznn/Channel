@@ -20,7 +20,7 @@ type Msg struct {
     Data string
 }
 
-func MsgFromBytes(rawBytes []byte) Msg {
+func MsgFromBytes(rawBytes []byte) (Msg, error) {
     var buffer bytes.Buffer
     dec := gob.NewDecoder(&buffer)
     var msg Msg
@@ -31,10 +31,10 @@ func MsgFromBytes(rawBytes []byte) Msg {
         log.Fatal("decode error:", err)
     }
 
-    return msg
+    return msg, err
 }
 
-func (m Msg) MsgToBytes() []byte {
+func (m Msg) MsgToBytes() ([]byte, error) {
     var buffer bytes.Buffer
     enc := gob.NewEncoder(&buffer)
 
@@ -43,5 +43,5 @@ func (m Msg) MsgToBytes() []byte {
         log.Fatal("encode error:", err)
     }
 
-    return buffer.Bytes()
+    return buffer.Bytes(), err
 }

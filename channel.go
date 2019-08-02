@@ -31,7 +31,8 @@ func (c Channel) Send(msg Msg, index int) {
     }
     defer conn.Close()
 
-    data := msg.MsgToBytes()
+    data, err := msg.MsgToBytes()
+    // TODO check err
     buff := make([]byte, 128)
 
     for {
@@ -75,7 +76,8 @@ func (c Channel) Serve(dataChan chan Msg, addrChan chan string) {
 
         // try to convert the bytes into a Msg
         // if I can, ack the sender and return the message
-        msg := MsgFromBytes(buffer[:n])
+        msg, err := MsgFromBytes(buffer[:n])
+        // TODO check err
 
         n, err = pc.WriteTo([]byte("ok"), addr)
         if err != nil {
