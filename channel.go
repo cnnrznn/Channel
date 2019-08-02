@@ -73,7 +73,7 @@ func (c Channel) Serve(dataChan chan Msg, addrChan chan string) {
         }
         fmt.Println("Received", n, "bytes from", addr)
 
-        // TODO try to convert the bytes into a Msg
+        // try to convert the bytes into a Msg
         // if I can, ack the sender and return the message
         msg := MsgFromBytes(buffer[:n])
 
